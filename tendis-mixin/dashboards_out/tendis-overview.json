@@ -1,0 +1,2578 @@
+{
+      "annotations": {
+         "list": [
+            {
+               "builtIn": 1,
+               "datasource": "-- Grafana --",
+               "enable": true,
+               "hide": true,
+               "iconColor": "rgba(0, 211, 255, 1)",
+               "name": "Annotations & Alerts",
+               "type": "dashboard"
+            }
+         ]
+      },
+      "editable": true,
+      "graphTooltip": 1,
+      "panels": [
+         {
+            "collapsed": false,
+            "gridPos": {
+               "h": 1,
+               "w": 24,
+               "x": 0,
+               "y": 0
+            },
+            "id": 1,
+            "title": "Cluster Overview",
+            "type": "row"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "Tendis instance status",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "thresholds"
+                  },
+                  "mappings": [
+                     {
+                        "options": {
+                           "0": {
+                              "color": "red",
+                              "index": 1,
+                              "text": "DOWN"
+                           },
+                           "1": {
+                              "color": "green",
+                              "index": 0,
+                              "text": "UP"
+                           }
+                        },
+                        "type": "value"
+                     }
+                  ],
+                  "thresholds": {
+                     "mode": "absolute",
+                     "steps": [
+                        {
+                           "color": "red",
+                           "value": null
+                        },
+                        {
+                           "color": "green",
+                           "value": 1
+                        }
+                     ]
+                  }
+               }
+            },
+            "gridPos": {
+               "h": 4,
+               "w": 4,
+               "x": 0,
+               "y": 1
+            },
+            "id": 2,
+            "options": {
+               "orientation": "auto",
+               "reduceOptions": {
+                  "calcs": [
+                     "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "tendis_exporter_up",
+                  "legendFormat": "{{instance}}",
+                  "refId": "A"
+               }
+            ],
+            "title": "Instance Status",
+            "type": "stat"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "Cluster state",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "thresholds"
+                  },
+                  "mappings": [
+                     {
+                        "options": {
+                           "0": {
+                              "color": "red",
+                              "index": 1,
+                              "text": "FAIL"
+                           },
+                           "1": {
+                              "color": "green",
+                              "index": 0,
+                              "text": "OK"
+                           }
+                        },
+                        "type": "value"
+                     }
+                  ],
+                  "thresholds": {
+                     "mode": "absolute",
+                     "steps": [
+                        {
+                           "color": "red",
+                           "value": null
+                        },
+                        {
+                           "color": "green",
+                           "value": 1
+                        }
+                     ]
+                  }
+               }
+            },
+            "gridPos": {
+               "h": 4,
+               "w": 4,
+               "x": 4,
+               "y": 1
+            },
+            "id": 3,
+            "options": {
+               "orientation": "auto",
+               "reduceOptions": {
+                  "calcs": [
+                     "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "tendis_cluster_state",
+                  "legendFormat": "{{instance}}",
+                  "refId": "A"
+               }
+            ],
+            "title": "Cluster State",
+            "type": "stat"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "Replication role",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "palette-classic"
+                  },
+                  "mappings": [
+                     {
+                        "options": {
+                           "master": {
+                              "color": "blue",
+                              "index": 0,
+                              "text": "MASTER"
+                           },
+                           "slave": {
+                              "color": "yellow",
+                              "index": 1,
+                              "text": "SLAVE"
+                           }
+                        },
+                        "type": "value"
+                     }
+                  ],
+                  "thresholds": {
+                     "mode": "absolute",
+                     "steps": [
+                        {
+                           "color": "green",
+                           "value": null
+                        }
+                     ]
+                  }
+               }
+            },
+            "gridPos": {
+               "h": 4,
+               "w": 4,
+               "x": 8,
+               "y": 1
+            },
+            "id": 4,
+            "options": {
+               "orientation": "auto",
+               "reduceOptions": {
+                  "calcs": [
+                     "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "tendis_replication_role{role=\"master\"} > 0",
+                  "legendFormat": "MASTER",
+                  "refId": "A"
+               },
+               {
+                  "expr": "tendis_replication_role{role=\"slave\"} > 0",
+                  "legendFormat": "SLAVE",
+                  "refId": "B"
+               }
+            ],
+            "title": "Replication Role",
+            "type": "stat"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "Connected clients",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "thresholds"
+                  },
+                  "unit": "short"
+               }
+            },
+            "gridPos": {
+               "h": 4,
+               "w": 4,
+               "x": 12,
+               "y": 1
+            },
+            "id": 5,
+            "options": {
+               "colorMode": "value",
+               "graphMode": "area",
+               "orientation": "auto",
+               "reduceOptions": {
+                  "calcs": [
+                     "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "tendis_info_connected_clients",
+                  "legendFormat": "{{instance}}",
+                  "refId": "A"
+               }
+            ],
+            "title": "Connected Clients",
+            "type": "stat"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "Cluster nodes",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "thresholds"
+                  },
+                  "unit": "short"
+               }
+            },
+            "gridPos": {
+               "h": 4,
+               "w": 4,
+               "x": 16,
+               "y": 1
+            },
+            "id": 6,
+            "options": {
+               "orientation": "auto",
+               "reduceOptions": {
+                  "calcs": [
+                     "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "tendis_info_cluster_cluster_known_nodes",
+                  "legendFormat": "{{instance}}",
+                  "refId": "A"
+               }
+            ],
+            "title": "Cluster Nodes",
+            "type": "stat"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "Cluster size",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "thresholds"
+                  },
+                  "unit": "short"
+               }
+            },
+            "gridPos": {
+               "h": 4,
+               "w": 4,
+               "x": 20,
+               "y": 1
+            },
+            "id": 7,
+            "options": {
+               "orientation": "auto",
+               "reduceOptions": {
+                  "calcs": [
+                     "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "tendis_info_cluster_cluster_size",
+                  "legendFormat": "{{instance}}",
+                  "refId": "A"
+               }
+            ],
+            "title": "Cluster Size",
+            "type": "stat"
+         },
+         {
+            "collapsed": false,
+            "gridPos": {
+               "h": 1,
+               "w": 24,
+               "x": 0,
+               "y": 5
+            },
+            "id": 8,
+            "title": "Performance Metrics",
+            "type": "row"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "Instantaneous operations per second",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "palette-classic"
+                  },
+                  "unit": "ops"
+               }
+            },
+            "gridPos": {
+               "h": 8,
+               "w": 12,
+               "x": 0,
+               "y": 6
+            },
+            "id": 9,
+            "options": {
+               "legend": {
+                  "calcs": [
+                     "mean",
+                     "max"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom"
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "rate(tendis_info_total_commands_processed[5m])",
+                  "legendFormat": "QPS - {{instance}}",
+                  "refId": "A"
+               },
+               {
+                  "expr": "tendis_info_instantaneous_ops_per_sec",
+                  "legendFormat": "Instant QPS - {{instance}}",
+                  "refId": "B"
+               }
+            ],
+            "title": "QPS",
+            "type": "timeseries"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "Network input/output rate",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "palette-classic"
+                  },
+                  "unit": "binBps"
+               }
+            },
+            "gridPos": {
+               "h": 8,
+               "w": 12,
+               "x": 12,
+               "y": 6
+            },
+            "id": 10,
+            "options": {
+               "legend": {
+                  "calcs": [
+                     "mean",
+                     "max"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom"
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "rate(tendis_info_total_net_input_bytes[5m]) * 8",
+                  "legendFormat": "Input - {{instance}}",
+                  "refId": "A"
+               },
+               {
+                  "expr": "rate(tendis_info_total_net_output_bytes[5m]) * 8",
+                  "legendFormat": "Output - {{instance}}",
+                  "refId": "B"
+               }
+            ],
+            "title": "Network I/O",
+            "type": "timeseries"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "Keyspace hit rate",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "palette-classic"
+                  },
+                  "unit": "percentunit"
+               }
+            },
+            "gridPos": {
+               "h": 8,
+               "w": 12,
+               "x": 0,
+               "y": 14
+            },
+            "id": 11,
+            "options": {
+               "legend": {
+                  "calcs": [
+                     "last",
+                     "mean"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom"
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "rate(tendis_info_keyspace_hits[5m]) / (rate(tendis_info_keyspace_hits[5m]) + rate(tendis_info_keyspace_misses[5m])) * 100",
+                  "legendFormat": "Hit Rate - {{instance}}",
+                  "refId": "A"
+               }
+            ],
+            "title": "Keyspace Hit Rate",
+            "type": "timeseries"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "Command execution time",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "palette-classic"
+                  },
+                  "unit": "s"
+               }
+            },
+            "gridPos": {
+               "h": 8,
+               "w": 12,
+               "x": 12,
+               "y": 14
+            },
+            "id": 12,
+            "options": {
+               "legend": {
+                  "calcs": [
+                     "mean",
+                     "max",
+                     "p95"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom"
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "rate(tendis_info_total_commands_cost_ns[5m]) / rate(tendis_info_total_commands_processed[5m]) / 1e9",
+                  "legendFormat": "Avg Command Time - {{instance}}",
+                  "refId": "A"
+               }
+            ],
+            "title": "Average Command Latency",
+            "type": "timeseries"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "Top commands by call count",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "palette-classic"
+                  },
+                  "unit": "ops"
+               }
+            },
+            "gridPos": {
+               "h": 8,
+               "w": 12,
+               "x": 0,
+               "y": 22
+            },
+            "id": 13,
+            "options": {
+               "displayMode": "gradient",
+               "legend": {
+                  "calcs": [
+                     "last"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom"
+               },
+               "orientation": "horizontal",
+               "showValue": "always"
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "topk(10, sum by(cmd, instance) (rate(tendis_command_calls_total[5m])))",
+                  "legendFormat": "{{cmd}} - {{instance}}",
+                  "refId": "A"
+               }
+            ],
+            "title": "Top 10 Commands by QPS",
+            "type": "bargauge"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "Top commands by latency",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "palette-classic"
+                  },
+                  "unit": "µs"
+               }
+            },
+            "gridPos": {
+               "h": 8,
+               "w": 12,
+               "x": 12,
+               "y": 22
+            },
+            "id": 14,
+            "options": {
+               "legend": {
+                  "calcs": [
+                     "last"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom"
+               },
+               "orientation": "horizontal",
+               "showValue": "always"
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "topk(10, avg by(cmd, instance) (tendis_command_usec_per_call))",
+                  "legendFormat": "{{cmd}} - {{instance}}",
+                  "refId": "A"
+               }
+            ],
+            "title": "Top 10 Commands by Latency",
+            "type": "bargauge"
+         },
+         {
+            "collapsed": false,
+            "gridPos": {
+               "h": 1,
+               "w": 24,
+               "x": 0,
+               "y": 30
+            },
+            "id": 15,
+            "title": "RocksDB Binlog",
+            "type": "row"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "Binlog remain count",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "palette-classic"
+                  },
+                  "unit": "short"
+               }
+            },
+            "gridPos": {
+               "h": 8,
+               "w": 12,
+               "x": 0,
+               "y": 31
+            },
+            "id": 16,
+            "options": {
+               "legend": {
+                  "calcs": [
+                     "last",
+                     "max",
+                     "mean"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom"
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "sum by(instance, db) (tendis_binlog_remain)",
+                  "legendFormat": "{{instance}} - {{db}}",
+                  "refId": "A"
+               }
+            ],
+            "title": "Binlog Remain",
+            "type": "timeseries"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "Binlog high/low watermarks",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "palette-classic"
+                  },
+                  "unit": "short"
+               }
+            },
+            "gridPos": {
+               "h": 8,
+               "w": 12,
+               "x": 12,
+               "y": 31
+            },
+            "id": 17,
+            "options": {
+               "legend": {
+                  "calcs": [
+                     "last",
+                     "max",
+                     "mean"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom"
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "sum by(instance) (tendis_binlog_BHWM)",
+                  "legendFormat": "BHWM - {{instance}}",
+                  "refId": "A"
+               },
+               {
+                  "expr": "sum by(instance) (tendis_binlog_BLWM)",
+                  "legendFormat": "BLWM - {{instance}}",
+                  "refId": "B"
+               }
+            ],
+            "title": "Binlog Watermarks",
+            "type": "timeseries"
+         },
+         {
+            "collapsed": false,
+            "gridPos": {
+               "h": 1,
+               "w": 24,
+               "x": 0,
+               "y": 39
+            },
+            "id": 18,
+            "title": "RocksDB Level Stats",
+            "type": "row"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "RocksDB level file count",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "palette-classic"
+                  },
+                  "unit": "short"
+               }
+            },
+            "gridPos": {
+               "h": 8,
+               "w": 12,
+               "x": 0,
+               "y": 40
+            },
+            "id": 19,
+            "options": {
+               "legend": {
+                  "calcs": [
+                     "last"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom"
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "sum by(instance, level) (tendis_levelstats_num_files)",
+                  "legendFormat": "{{instance}} - {{level}}",
+                  "refId": "A"
+               }
+            ],
+            "title": "Level Files Count",
+            "type": "timeseries"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "RocksDB level size",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "palette-classic"
+                  },
+                  "unit": "bytes"
+               }
+            },
+            "gridPos": {
+               "h": 8,
+               "w": 12,
+               "x": 12,
+               "y": 40
+            },
+            "id": 20,
+            "options": {
+               "legend": {
+                  "calcs": [
+                     "last"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom"
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "sum by(instance, level) (tendis_levelstats_bytes)",
+                  "legendFormat": "{{instance}} - {{level}}",
+                  "refId": "A"
+               }
+            ],
+            "title": "Level Size",
+            "type": "timeseries"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "RocksDB level entries",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "palette-classic"
+                  },
+                  "unit": "short"
+               }
+            },
+            "gridPos": {
+               "h": 8,
+               "w": 12,
+               "x": 0,
+               "y": 48
+            },
+            "id": 21,
+            "options": {
+               "legend": {
+                  "calcs": [
+                     "last"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom"
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "sum by(instance, level) (tendis_levelstats_num_entries)",
+                  "legendFormat": "{{instance}} - {{level}}",
+                  "refId": "A"
+               }
+            ],
+            "title": "Level Entries Count",
+            "type": "timeseries"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "RocksDB total SST files size",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "thresholds"
+                  },
+                  "unit": "bytes"
+               }
+            },
+            "gridPos": {
+               "h": 8,
+               "w": 12,
+               "x": 12,
+               "y": 48
+            },
+            "id": 22,
+            "options": {
+               "orientation": "auto",
+               "reduceOptions": {
+                  "calcs": [
+                     "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "tendis_info_rocksdb_total_sst_files_size",
+                  "legendFormat": "{{instance}}",
+                  "refId": "A"
+               }
+            ],
+            "title": "Total SST Files Size",
+            "type": "stat"
+         },
+         {
+            "collapsed": false,
+            "gridPos": {
+               "h": 1,
+               "w": 24,
+               "x": 0,
+               "y": 56
+            },
+            "id": 23,
+            "title": "RocksDB Cache & Performance",
+            "type": "row"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "Block cache usage",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "palette-classic"
+                  },
+                  "unit": "bytes"
+               }
+            },
+            "gridPos": {
+               "h": 8,
+               "w": 8,
+               "x": 0,
+               "y": 57
+            },
+            "id": 24,
+            "options": {
+               "legend": {
+                  "calcs": [
+                     "last",
+                     "max"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom"
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "tendis_info_rocksdb_blockcache_usage",
+                  "legendFormat": "Usage - {{instance}}",
+                  "refId": "A"
+               },
+               {
+                  "expr": "tendis_info_rocksdb_blockcache_capacity",
+                  "legendFormat": "Capacity - {{instance}}",
+                  "refId": "B"
+               }
+            ],
+            "title": "Block Cache",
+            "type": "timeseries"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "Row cache usage",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "palette-classic"
+                  },
+                  "unit": "bytes"
+               }
+            },
+            "gridPos": {
+               "h": 8,
+               "w": 8,
+               "x": 8,
+               "y": 57
+            },
+            "id": 25,
+            "options": {
+               "legend": {
+                  "calcs": [
+                     "last",
+                     "max"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom"
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "tendis_info_rocksdb_rowcache_usage",
+                  "legendFormat": "Usage - {{instance}}",
+                  "refId": "A"
+               },
+               {
+                  "expr": "tendis_info_rocksdb_rowcache_capacity",
+                  "legendFormat": "Capacity - {{instance}}",
+                  "refId": "B"
+               }
+            ],
+            "title": "Row Cache",
+            "type": "timeseries"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "Block cache hit rate",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "palette-classic"
+                  },
+                  "unit": "percentunit"
+               }
+            },
+            "gridPos": {
+               "h": 8,
+               "w": 8,
+               "x": 16,
+               "y": 57
+            },
+            "id": 26,
+            "options": {
+               "legend": {
+                  "calcs": [
+                     "last",
+                     "mean"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom"
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "rate(tendis_info_rocksdb_block_cache_hit_COUNT[5m]) / (rate(tendis_info_rocksdb_block_cache_hit_COUNT[5m]) + rate(tendis_info_rocksdb_block_cache_miss_COUNT[5m])) * 100",
+                  "legendFormat": "Data - {{instance}}",
+                  "refId": "A"
+               },
+               {
+                  "expr": "rate(tendis_info_rocksdb_block_cache_index_hit_COUNT[5m]) / (rate(tendis_info_rocksdb_block_cache_index_hit_COUNT[5m]) + rate(tendis_info_rocksdb_block_cache_index_miss_COUNT[5m])) * 100",
+                  "legendFormat": "Index - {{instance}}",
+                  "refId": "B"
+               }
+            ],
+            "title": "Block Cache Hit Rate",
+            "type": "timeseries"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "RocksDB read/write bytes",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "palette-classic"
+                  },
+                  "unit": "Bps"
+               }
+            },
+            "gridPos": {
+               "h": 8,
+               "w": 12,
+               "x": 0,
+               "y": 65
+            },
+            "id": 27,
+            "options": {
+               "legend": {
+                  "calcs": [
+                     "mean",
+                     "max"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom"
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "rate(tendis_info_rocksdb_bytes_read_COUNT[5m])",
+                  "legendFormat": "Read - {{instance}}",
+                  "refId": "A"
+               },
+               {
+                  "expr": "rate(tendis_info_rocksdb_bytes_written_COUNT[5m])",
+                  "legendFormat": "Write - {{instance}}",
+                  "refId": "B"
+               }
+            ],
+            "title": "RocksDB I/O",
+            "type": "timeseries"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "RocksDB compaction bytes",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "palette-classic"
+                  },
+                  "unit": "Bps"
+               }
+            },
+            "gridPos": {
+               "h": 8,
+               "w": 12,
+               "x": 12,
+               "y": 65
+            },
+            "id": 28,
+            "options": {
+               "legend": {
+                  "calcs": [
+                     "mean",
+                     "max"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom"
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "rate(tendis_info_rocksdb_compact_read_bytes_COUNT[5m])",
+                  "legendFormat": "Compaction Read - {{instance}}",
+                  "refId": "A"
+               },
+               {
+                  "expr": "rate(tendis_info_rocksdb_compact_write_bytes_COUNT[5m])",
+                  "legendFormat": "Compaction Write - {{instance}}",
+                  "refId": "B"
+               }
+            ],
+            "title": "RocksDB Compaction I/O",
+            "type": "timeseries"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "Bloom filter effectiveness",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "palette-classic"
+                  },
+                  "unit": "percentunit"
+               }
+            },
+            "gridPos": {
+               "h": 8,
+               "w": 12,
+               "x": 0,
+               "y": 73
+            },
+            "id": 29,
+            "options": {
+               "legend": {
+                  "calcs": [
+                     "last",
+                     "mean"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom"
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "rate(tendis_info_rocksdb_bloom_filter_useful_COUNT[5m]) / (rate(tendis_info_rocksdb_bloom_filter_useful_COUNT[5m]) + rate(tendis_info_rocksdb_bloom_filter_full_positive_COUNT[5m])) * 100",
+                  "legendFormat": "Useful Rate - {{instance}}",
+                  "refId": "A"
+               }
+            ],
+            "title": "Bloom Filter Effectiveness",
+            "type": "timeseries"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "Estimate keys count",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "thresholds"
+                  },
+                  "unit": "short"
+               }
+            },
+            "gridPos": {
+               "h": 8,
+               "w": 12,
+               "x": 12,
+               "y": 73
+            },
+            "id": 30,
+            "options": {
+               "orientation": "auto",
+               "reduceOptions": {
+                  "calcs": [
+                     "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "tendis_info_rocksdb_estimate_num_keys",
+                  "legendFormat": "{{instance}}",
+                  "refId": "A"
+               }
+            ],
+            "title": "Estimated Keys",
+            "type": "stat"
+         },
+         {
+            "collapsed": false,
+            "gridPos": {
+               "h": 1,
+               "w": 24,
+               "x": 0,
+               "y": 81
+            },
+            "id": 31,
+            "title": "Keyspace & TTL",
+            "type": "row"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "Keys in database",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "palette-classic"
+                  },
+                  "unit": "short"
+               }
+            },
+            "gridPos": {
+               "h": 8,
+               "w": 12,
+               "x": 0,
+               "y": 82
+            },
+            "id": 32,
+            "options": {
+               "legend": {
+                  "calcs": [
+                     "last",
+                     "max"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom"
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "sum by(instance, db) (tendis_db_keys)",
+                  "legendFormat": "{{instance}} - {{db}}",
+                  "refId": "A"
+               }
+            ],
+            "title": "DB Keys",
+            "type": "timeseries"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "Expiring keys in database",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "palette-classic"
+                  },
+                  "unit": "short"
+               }
+            },
+            "gridPos": {
+               "h": 8,
+               "w": 12,
+               "x": 12,
+               "y": 82
+            },
+            "id": 33,
+            "options": {
+               "legend": {
+                  "calcs": [
+                     "last",
+                     "max"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom"
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "sum by(instance, db) (tendis_db_expires)",
+                  "legendFormat": "{{instance}} - {{db}}",
+                  "refId": "A"
+               }
+            ],
+            "title": "DB Expires",
+            "type": "timeseries"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "Average TTL",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "palette-classic"
+                  },
+                  "unit": "s"
+               }
+            },
+            "gridPos": {
+               "h": 8,
+               "w": 12,
+               "x": 0,
+               "y": 90
+            },
+            "id": 34,
+            "options": {
+               "legend": {
+                  "calcs": [
+                     "last",
+                     "mean"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom"
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "avg by(instance, db) (tendis_db_avg_ttl_seconds)",
+                  "legendFormat": "{{instance}} - {{db}}",
+                  "refId": "A"
+               }
+            ],
+            "title": "Average TTL",
+            "type": "timeseries"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "Expired keys count",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "palette-classic"
+                  },
+                  "unit": "ops"
+               }
+            },
+            "gridPos": {
+               "h": 8,
+               "w": 12,
+               "x": 12,
+               "y": 90
+            },
+            "id": 35,
+            "options": {
+               "legend": {
+                  "calcs": [
+                     "sum",
+                     "rate"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom"
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "rate(tendis_info_total_expire_keys[5m])",
+                  "legendFormat": "{{instance}}",
+                  "refId": "A"
+               }
+            ],
+            "title": "Expired Keys Rate",
+            "type": "timeseries"
+         },
+         {
+            "collapsed": false,
+            "gridPos": {
+               "h": 1,
+               "w": 24,
+               "x": 0,
+               "y": 98
+            },
+            "id": 36,
+            "title": "Replication",
+            "type": "row"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "Replication offset lag (master)",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "palette-classic"
+                  },
+                  "unit": "short"
+               }
+            },
+            "gridPos": {
+               "h": 8,
+               "w": 12,
+               "x": 0,
+               "y": 99
+            },
+            "id": 37,
+            "options": {
+               "legend": {
+                  "calcs": [
+                     "last",
+                     "max",
+                     "mean"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom"
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "tendis_info_master_repl_offset - max by(instance) (tendis_slave_offset)",
+                  "legendFormat": "Offset Lag - {{instance}}",
+                  "refId": "A"
+               }
+            ],
+            "title": "Replication Offset Lag (Master)",
+            "type": "timeseries"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "Replication lag in seconds (slave)",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "palette-classic"
+                  },
+                  "unit": "s"
+               }
+            },
+            "gridPos": {
+               "h": 8,
+               "w": 12,
+               "x": 12,
+               "y": 99
+            },
+            "id": 38,
+            "options": {
+               "legend": {
+                  "calcs": [
+                     "last",
+                     "max",
+                     "mean"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom"
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "tendis_slave_lag_seconds",
+                  "legendFormat": "{{instance}} - {{slave_id}}",
+                  "refId": "A"
+               }
+            ],
+            "title": "Replication Lag (Slave)",
+            "type": "timeseries"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "Slave binlog lag",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "palette-classic"
+                  },
+                  "unit": "s"
+               }
+            },
+            "gridPos": {
+               "h": 8,
+               "w": 12,
+               "x": 0,
+               "y": 107
+            },
+            "id": 39,
+            "options": {
+               "legend": {
+                  "calcs": [
+                     "last",
+                     "max",
+                     "mean"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom"
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "tendis_slave_binlog_lag_seconds",
+                  "legendFormat": "{{instance}} - {{slave_id}}",
+                  "refId": "A"
+               }
+            ],
+            "title": "Slave Binlog Lag",
+            "type": "timeseries"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "Connected slaves (master)",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "thresholds"
+                  },
+                  "unit": "short"
+               }
+            },
+            "gridPos": {
+               "h": 8,
+               "w": 12,
+               "x": 12,
+               "y": 107
+            },
+            "id": 40,
+            "options": {
+               "orientation": "auto",
+               "reduceOptions": {
+                  "calcs": [
+                     "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "tendis_info_connected_slaves",
+                  "legendFormat": "{{instance}}",
+                  "refId": "A"
+               }
+            ],
+            "title": "Connected Slaves",
+            "type": "stat"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "Master last I/O seconds ago (slave)",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "palette-classic"
+                  },
+                  "unit": "s"
+               }
+            },
+            "gridPos": {
+               "h": 8,
+               "w": 12,
+               "x": 0,
+               "y": 115
+            },
+            "id": 41,
+            "options": {
+               "legend": {
+                  "calcs": [
+                     "last",
+                     "max"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom"
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "tendis_info_master_last_io_seconds_ago",
+                  "legendFormat": "{{instance}}",
+                  "refId": "A"
+               }
+            ],
+            "title": "Master Last I/O (Slave View)",
+            "type": "timeseries"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "Slave state",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "thresholds"
+                  },
+                  "mappings": [
+                     {
+                        "options": {
+                           "0": {
+                              "color": "red",
+                              "index": 1,
+                              "text": "OFFLINE"
+                           },
+                           "1": {
+                              "color": "green",
+                              "index": 0,
+                              "text": "ONLINE"
+                           }
+                        },
+                        "type": "value"
+                     }
+                  ],
+                  "thresholds": {
+                     "mode": "absolute",
+                     "steps": [
+                        {
+                           "color": "red",
+                           "value": null
+                        },
+                        {
+                           "color": "green",
+                           "value": 1
+                        }
+                     ]
+                  }
+               }
+            },
+            "gridPos": {
+               "h": 8,
+               "w": 12,
+               "x": 12,
+               "y": 115
+            },
+            "id": 42,
+            "options": {
+               "orientation": "auto",
+               "reduceOptions": {
+                  "calcs": [
+                     "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "tendis_slave_state",
+                  "legendFormat": "{{instance}} - {{slave_id}}",
+                  "refId": "A"
+               }
+            ],
+            "title": "Slave State",
+            "type": "stat"
+         },
+         {
+            "collapsed": false,
+            "gridPos": {
+               "h": 1,
+               "w": 24,
+               "x": 0,
+               "y": 123
+            },
+            "id": 43,
+            "title": "Memory & Resources",
+            "type": "row"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "Process resident memory",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "palette-classic"
+                  },
+                  "unit": "bytes"
+               }
+            },
+            "gridPos": {
+               "h": 8,
+               "w": 12,
+               "x": 0,
+               "y": 124
+            },
+            "id": 44,
+            "options": {
+               "legend": {
+                  "calcs": [
+                     "last",
+                     "max",
+                     "mean"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom"
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "tendis_tendis_process_resident_memory_bytes",
+                  "legendFormat": "RSS - {{instance}}",
+                  "refId": "A"
+               },
+               {
+                  "expr": "tendis_info_used_memory_rss",
+                  "legendFormat": "Tendis RSS - {{instance}}",
+                  "refId": "B"
+               }
+            ],
+            "title": "Resident Memory",
+            "type": "timeseries"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "Process virtual memory",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "palette-classic"
+                  },
+                  "unit": "bytes"
+               }
+            },
+            "gridPos": {
+               "h": 8,
+               "w": 12,
+               "x": 12,
+               "y": 124
+            },
+            "id": 45,
+            "options": {
+               "legend": {
+                  "calcs": [
+                     "last",
+                     "max",
+                     "mean"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom"
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "tendis_tendis_process_virtual_memory_bytes",
+                  "legendFormat": "Virtual - {{instance}}",
+                  "refId": "A"
+               },
+               {
+                  "expr": "tendis_info_used_memory_vir",
+                  "legendFormat": "Tendis Virtual - {{instance}}",
+                  "refId": "B"
+               }
+            ],
+            "title": "Virtual Memory",
+            "type": "timeseries"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "RocksDB total memory",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "palette-classic"
+                  },
+                  "unit": "bytes"
+               }
+            },
+            "gridPos": {
+               "h": 8,
+               "w": 12,
+               "x": 0,
+               "y": 132
+            },
+            "id": 46,
+            "options": {
+               "legend": {
+                  "calcs": [
+                     "last",
+                     "max",
+                     "mean"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom"
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "tendis_info_rocksdb_total_memory",
+                  "legendFormat": "{{instance}}",
+                  "refId": "A"
+               }
+            ],
+            "title": "RocksDB Memory",
+            "type": "timeseries"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "RocksDB memtables size",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "palette-classic"
+                  },
+                  "unit": "bytes"
+               }
+            },
+            "gridPos": {
+               "h": 8,
+               "w": 12,
+               "x": 12,
+               "y": 132
+            },
+            "id": 47,
+            "options": {
+               "legend": {
+                  "calcs": [
+                     "last",
+                     "max",
+                     "mean"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom"
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "tendis_info_rocksdb_size_all_mem_tables",
+                  "legendFormat": "{{instance}}",
+                  "refId": "A"
+               }
+            ],
+            "title": "RocksDB Memtables",
+            "type": "timeseries"
+         },
+         {
+            "collapsed": false,
+            "gridPos": {
+               "h": 1,
+               "w": 24,
+               "x": 0,
+               "y": 140
+            },
+            "id": 48,
+            "title": "CPU & Process Stats",
+            "type": "row"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "CPU usage",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "palette-classic"
+                  },
+                  "unit": "percent"
+               }
+            },
+            "gridPos": {
+               "h": 8,
+               "w": 12,
+               "x": 0,
+               "y": 141
+            },
+            "id": 49,
+            "options": {
+               "legend": {
+                  "calcs": [
+                     "last",
+                     "mean",
+                     "max"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom"
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "rate(tendis_tendis_process_cpu_seconds_total[5m]) * 100",
+                  "legendFormat": "CPU - {{instance}}",
+                  "refId": "A"
+               }
+            ],
+            "title": "CPU Usage",
+            "type": "timeseries"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "Process threads",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "palette-classic"
+                  },
+                  "unit": "short"
+               }
+            },
+            "gridPos": {
+               "h": 8,
+               "w": 12,
+               "x": 12,
+               "y": 141
+            },
+            "id": 50,
+            "options": {
+               "legend": {
+                  "calcs": [
+                     "last",
+                     "min",
+                     "max"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom"
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "tendis_tendis_process_threads_count",
+                  "legendFormat": "{{instance}}",
+                  "refId": "A"
+               }
+            ],
+            "title": "Process Threads",
+            "type": "timeseries"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "Context switches",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "palette-classic"
+                  },
+                  "unit": "ops"
+               }
+            },
+            "gridPos": {
+               "h": 8,
+               "w": 12,
+               "x": 0,
+               "y": 149
+            },
+            "id": 51,
+            "options": {
+               "legend": {
+                  "calcs": [
+                     "sum",
+                     "mean"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom"
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "rate(tendis_tendis_process_context_switches_voluntary_total[5m])",
+                  "legendFormat": "Voluntary - {{instance}}",
+                  "refId": "A"
+               },
+               {
+                  "expr": "rate(tendis_tendis_process_context_switches_nonvoluntary_total[5m])",
+                  "legendFormat": "Non-Voluntary - {{instance}}",
+                  "refId": "B"
+               }
+            ],
+            "title": "Context Switches Rate",
+            "type": "timeseries"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "Page faults",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "palette-classic"
+                  },
+                  "unit": "ops"
+               }
+            },
+            "gridPos": {
+               "h": 8,
+               "w": 12,
+               "x": 12,
+               "y": 149
+            },
+            "id": 52,
+            "options": {
+               "legend": {
+                  "calcs": [
+                     "sum",
+                     "mean"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom"
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "rate(tendis_tendis_process_page_faults_minor_total[5m])",
+                  "legendFormat": "Minor - {{instance}}",
+                  "refId": "A"
+               },
+               {
+                  "expr": "rate(tendis_tendis_process_page_faults_major_total[5m])",
+                  "legendFormat": "Major - {{instance}}",
+                  "refId": "B"
+               }
+            ],
+            "title": "Page Faults Rate",
+            "type": "timeseries"
+         },
+         {
+            "collapsed": false,
+            "gridPos": {
+               "h": 1,
+               "w": 24,
+               "x": 0,
+               "y": 157
+            },
+            "id": 53,
+            "title": "Disk I/O",
+            "type": "row"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "Disk read I/O",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "palette-classic"
+                  },
+                  "unit": "Bps"
+               }
+            },
+            "gridPos": {
+               "h": 8,
+               "w": 12,
+               "x": 0,
+               "y": 158
+            },
+            "id": 54,
+            "options": {
+               "legend": {
+                  "calcs": [
+                     "mean",
+                     "max"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom"
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "rate(tendis_tendis_process_io_read_bytes_total[5m])",
+                  "legendFormat": "Physical Read - {{instance}}",
+                  "refId": "A"
+               },
+               {
+                  "expr": "rate(tendis_tendis_process_io_rchar_bytes_total[5m])",
+                  "legendFormat": "Logical Read - {{instance}}",
+                  "refId": "B"
+               }
+            ],
+            "title": "Disk Read I/O",
+            "type": "timeseries"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "Disk write I/O",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "palette-classic"
+                  },
+                  "unit": "Bps"
+               }
+            },
+            "gridPos": {
+               "h": 8,
+               "w": 12,
+               "x": 12,
+               "y": 158
+            },
+            "id": 55,
+            "options": {
+               "legend": {
+                  "calcs": [
+                     "mean",
+                     "max"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom"
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "rate(tendis_tendis_process_io_write_bytes_total[5m])",
+                  "legendFormat": "Physical Write - {{instance}}",
+                  "refId": "A"
+               },
+               {
+                  "expr": "rate(tendis_tendis_process_io_wchar_bytes_total[5m])",
+                  "legendFormat": "Logical Write - {{instance}}",
+                  "refId": "B"
+               }
+            ],
+            "title": "Disk Write I/O",
+            "type": "timeseries"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "I/O operations",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "palette-classic"
+                  },
+                  "unit": "iops"
+               }
+            },
+            "gridPos": {
+               "h": 8,
+               "w": 12,
+               "x": 0,
+               "y": 166
+            },
+            "id": 56,
+            "options": {
+               "legend": {
+                  "calcs": [
+                     "sum",
+                     "mean"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom"
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "rate(tendis_tendis_process_io_syscr_total[5m])",
+                  "legendFormat": "Read Ops - {{instance}}",
+                  "refId": "A"
+               },
+               {
+                  "expr": "rate(tendis_tendis_process_io_syscw_total[5m])",
+                  "legendFormat": "Write Ops - {{instance}}",
+                  "refId": "B"
+               }
+            ],
+            "title": "I/O Operations Rate",
+            "type": "timeseries"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "Block I/O delay",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "palette-classic"
+                  },
+                  "unit": "s"
+               }
+            },
+            "gridPos": {
+               "h": 8,
+               "w": 12,
+               "x": 12,
+               "y": 166
+            },
+            "id": 57,
+            "options": {
+               "legend": {
+                  "calcs": [
+                     "sum",
+                     "mean"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom"
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "rate(tendis_tendis_process_blkio_delay_seconds_total[5m])",
+                  "legendFormat": "{{instance}}",
+                  "refId": "A"
+               }
+            ],
+            "title": "Block I/O Delay Rate",
+            "type": "timeseries"
+         },
+         {
+            "collapsed": false,
+            "gridPos": {
+               "h": 1,
+               "w": 24,
+               "x": 0,
+               "y": 174
+            },
+            "id": 58,
+            "title": "System & Cluster Health",
+            "type": "row"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "Uptime",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "thresholds"
+                  },
+                  "unit": "s"
+               }
+            },
+            "gridPos": {
+               "h": 6,
+               "w": 8,
+               "x": 0,
+               "y": 175
+            },
+            "id": 59,
+            "options": {
+               "orientation": "auto",
+               "reduceOptions": {
+                  "calcs": [
+                     "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "tendis_info_uptime_in_seconds",
+                  "legendFormat": "{{instance}}",
+                  "refId": "A"
+               }
+            ],
+            "title": "Uptime",
+            "type": "stat"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "Total connections received",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "thresholds"
+                  },
+                  "unit": "short"
+               }
+            },
+            "gridPos": {
+               "h": 6,
+               "w": 8,
+               "x": 8,
+               "y": 175
+            },
+            "id": 60,
+            "options": {
+               "orientation": "auto",
+               "reduceOptions": {
+                  "calcs": [
+                     "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "tendis_info_total_connections_received",
+                  "legendFormat": "{{instance}}",
+                  "refId": "A"
+               }
+            ],
+            "title": "Total Connections",
+            "type": "stat"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "Rejected connections",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "thresholds"
+                  },
+                  "unit": "short"
+               }
+            },
+            "gridPos": {
+               "h": 6,
+               "w": 8,
+               "x": 16,
+               "y": 175
+            },
+            "id": 61,
+            "options": {
+               "orientation": "auto",
+               "reduceOptions": {
+                  "calcs": [
+                     "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "tendis_info_rejected_connections",
+                  "legendFormat": "{{instance}}",
+                  "refId": "A"
+               }
+            ],
+            "title": "Rejected Connections",
+            "type": "stat"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "Compaction status",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "thresholds"
+                  },
+                  "mappings": [
+                     {
+                        "options": {
+                           "running": {
+                              "color": "green",
+                              "index": 0,
+                              "text": "RUNNING"
+                           },
+                           "stopped": {
+                              "color": "gray",
+                              "index": 1,
+                              "text": "STOPPED"
+                           }
+                        },
+                        "type": "value"
+                     }
+                  ],
+                  "thresholds": {
+                     "mode": "absolute",
+                     "steps": [
+                        {
+                           "color": "gray",
+                           "value": null
+                        }
+                     ]
+                  }
+               }
+            },
+            "gridPos": {
+               "h": 6,
+               "w": 8,
+               "x": 0,
+               "y": 181
+            },
+            "id": 62,
+            "options": {
+               "orientation": "auto",
+               "reduceOptions": {
+                  "calcs": [
+                     "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "tendis_compaction_status",
+                  "legendFormat": "{{instance}} - {{status}}",
+                  "refId": "A"
+               }
+            ],
+            "title": "Compaction Status",
+            "type": "stat"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "Time since last compaction",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "thresholds"
+                  },
+                  "unit": "s"
+               }
+            },
+            "gridPos": {
+               "h": 6,
+               "w": 8,
+               "x": 8,
+               "y": 181
+            },
+            "id": 63,
+            "options": {
+               "orientation": "auto",
+               "reduceOptions": {
+                  "calcs": [
+                     "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "tendis_info_time_since_lastest_compaction",
+                  "legendFormat": "{{instance}}",
+                  "refId": "A"
+               }
+            ],
+            "title": "Time Since Last Compaction",
+            "type": "stat"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "Pending compaction bytes",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "thresholds"
+                  },
+                  "unit": "bytes"
+               }
+            },
+            "gridPos": {
+               "h": 6,
+               "w": 8,
+               "x": 16,
+               "y": 181
+            },
+            "id": 64,
+            "options": {
+               "orientation": "auto",
+               "reduceOptions": {
+                  "calcs": [
+                     "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "tendis_info_rocksdb_estimate_pending_compaction_bytes",
+                  "legendFormat": "{{instance}}",
+                  "refId": "A"
+               }
+            ],
+            "title": "Pending Compaction",
+            "type": "stat"
+         },
+         {
+            "datasource": "Prometheus",
+            "description": "Cluster slot distribution",
+            "fieldConfig": {
+               "defaults": {
+                  "color": {
+                     "mode": "palette-classic"
+                  },
+                  "unit": "short"
+               }
+            },
+            "gridPos": {
+               "h": 8,
+               "w": 24,
+               "x": 0,
+               "y": 187
+            },
+            "id": 65,
+            "options": {
+               "legend": {
+                  "calcs": [
+                     "last"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom"
+               }
+            },
+            "pluginVersion": "v11.4.0",
+            "targets": [
+               {
+                  "expr": "tendis_info_cluster_cluster_slots_ok",
+                  "legendFormat": "OK - {{instance}}",
+                  "refId": "A"
+               },
+               {
+                  "expr": "tendis_info_cluster_cluster_slots_pfail",
+                  "legendFormat": "PFAIL - {{instance}}",
+                  "refId": "B"
+               },
+               {
+                  "expr": "tendis_info_cluster_cluster_slots_fail",
+                  "legendFormat": "FAIL - {{instance}}",
+                  "refId": "C"
+               },
+               {
+                  "expr": "tendis_info_cluster_cluster_slots_assigend",
+                  "legendFormat": "Assigned - {{instance}}",
+                  "refId": "D"
+               }
+            ],
+            "title": "Cluster Slot Distribution",
+            "type": "timeseries"
+         }
+      ],
+      "refresh": "30s",
+      "schemaVersion": 39,
+      "style": "dark",
+      "tags": [
+         "tendis",
+         "redis",
+         "rocksdb",
+         "database"
+      ],
+      "templating": {
+         "list": [
+            {
+               "current": {
+                  "text": "Prometheus",
+                  "value": "Prometheus"
+               },
+               "hide": 0,
+               "includeAll": false,
+               "label": "Data Source",
+               "multi": false,
+               "name": "datasource",
+               "query": "prometheus",
+               "refresh": 1,
+               "type": "datasource"
+            },
+            {
+               "allValue": null,
+               "datasource": "Prometheus",
+               "definition": "label_values(tendis_exporter_up, instance)",
+               "hide": 0,
+               "includeAll": true,
+               "label": "Instance",
+               "multi": true,
+               "name": "instance",
+               "query": {
+                  "query": "label_values(tendis_exporter_up, instance)",
+                  "refId": "StandardVariableQuery"
+               },
+               "refresh": 1,
+               "sort": 1,
+               "type": "query"
+            }
+         ]
+      },
+      "time": {
+         "from": "now-1h",
+         "to": "now"
+      },
+      "timepicker": {
+         "refresh_intervals": [
+            "5s",
+            "10s",
+            "30s",
+            "1m",
+            "5m",
+            "15m",
+            "30m",
+            "1h",
+            "2h",
+            "1d"
+         ],
+         "time_options": [
+            "5m",
+            "15m",
+            "1h",
+            "6h",
+            "12h",
+            "24h",
+            "2d",
+            "7d",
+            "30d"
+         ]
+      },
+      "timezone": "utc",
+      "title": "Tendis Overview",
+      "uid": "tendis-overview"
+   }

@@ -1,0 +1,85 @@
+groups:
+    - name: tendis_recording_rules
+      rules:
+        - expr: sum by (instance) (rate(tendis_info_total_commands_processed[5m]))
+          record: instance:tendis_commands_qps:rate5m
+        - expr: sum by (instance) (tendis_info_instantaneous_ops_per_sec)
+          record: instance:tendis_instant_qps
+        - expr: tendis_info_used_memory / tendis_info_maxmemory
+          record: instance:tendis_memory_usage_ratio
+        - expr: rate(tendis_info_keyspace_hits[5m]) / (rate(tendis_info_keyspace_hits[5m]) + rate(tendis_info_keyspace_misses[5m])) * 100
+          record: instance:tendis_keyspace_hit_rate
+        - expr: rate(tendis_info_total_commands_cost_ns[5m]) / rate(tendis_info_total_commands_processed[5m]) / 1e9
+          record: instance:tendis_avg_command_latency_seconds
+        - expr: sum by(instance, db) (tendis_levelstats_num_files)
+          record: instance_db:tendis_levelstats_files:sum
+        - expr: sum by(instance, db) (tendis_levelstats_bytes)
+          record: instance_db:tendis_levelstats_bytes:sum
+        - expr: sum by(instance, level) (tendis_levelstats_num_files)
+          record: instance_level:tendis_levelstats_num_files:sum
+        - expr: sum by(instance, level) (tendis_levelstats_bytes)
+          record: instance_level:tendis_levelstats_bytes:sum
+        - expr: sum by(instance, level) (tendis_levelstats_num_entries)
+          record: instance_level:tendis_levelstats_entries:sum
+        - expr: sum by(instance) (tendis_db_keys)
+          record: instance:tendis_total_keys
+        - expr: sum by(instance) (tendis_db_expires)
+          record: instance:tendis_total_expires
+        - expr: tendis_slave_offset
+          record: instance:tendis_slave_offset
+        - expr: tendis_info_master_repl_offset - max by(instance) (tendis_slave_offset)
+          record: instance:tendis_replication_offset_lag
+        - expr: rate(tendis_info_total_net_input_bytes[5m]) * 8
+          record: instance:tendis_net_input_bps
+        - expr: rate(tendis_info_total_net_output_bytes[5m]) * 8
+          record: instance:tendis_net_output_bps
+        - expr: rate(tendis_info_rocksdb_block_cache_hit_COUNT[5m]) / (rate(tendis_info_rocksdb_block_cache_hit_COUNT[5m]) + rate(tendis_info_rocksdb_block_cache_miss_COUNT[5m])) * 100
+          record: instance:tendis_block_cache_hit_rate
+        - expr: rate(tendis_info_rocksdb_block_cache_index_hit_COUNT[5m]) / (rate(tendis_info_rocksdb_block_cache_index_hit_COUNT[5m]) + rate(tendis_info_rocksdb_block_cache_index_miss_COUNT[5m])) * 100
+          record: instance:tendis_block_cache_index_hit_rate
+        - expr: rate(tendis_info_rocksdb_bloom_filter_useful_COUNT[5m]) / (rate(tendis_info_rocksdb_bloom_filter_useful_COUNT[5m]) + rate(tendis_info_rocksdb_bloom_filter_full_positive_COUNT[5m])) * 100
+          record: instance:tendis_bloom_filter_effectiveness
+        - expr: rate(tendis_info_rocksdb_bytes_read_COUNT[5m])
+          record: instance:tendis_rocksdb_read_bps
+        - expr: rate(tendis_info_rocksdb_bytes_written_COUNT[5m])
+          record: instance:tendis_rocksdb_write_bps
+        - expr: rate(tendis_info_rocksdb_compact_read_bytes_COUNT[5m])
+          record: instance:tendis_rocksdb_compact_read_bps
+        - expr: rate(tendis_info_rocksdb_compact_write_bytes_COUNT[5m])
+          record: instance:tendis_rocksdb_compact_write_bps
+        - expr: rate(tendis_info_total_expire_keys[5m])
+          record: instance:tendis_expire_keys_rate
+        - expr: rate(tendis_tendis_process_cpu_seconds_total[5m]) * 100
+          record: instance:tendis_cpu_usage_percent
+        - expr: rate(tendis_tendis_process_context_switches_voluntary_total[5m])
+          record: instance:tendis_context_switches_voluntary_rate
+        - expr: rate(tendis_tendis_process_context_switches_nonvoluntary_total[5m])
+          record: instance:tendis_context_switches_nonvoluntary_rate
+        - expr: rate(tendis_tendis_process_page_faults_minor_total[5m])
+          record: instance:tendis_page_faults_minor_rate
+        - expr: rate(tendis_tendis_process_page_faults_major_total[5m])
+          record: instance:tendis_page_faults_major_rate
+        - expr: rate(tendis_tendis_process_io_read_bytes_total[5m])
+          record: instance:tendis_disk_read_physical_bps
+        - expr: rate(tendis_tendis_process_io_rchar_bytes_total[5m])
+          record: instance:tendis_disk_read_logical_bps
+        - expr: rate(tendis_tendis_process_io_write_bytes_total[5m])
+          record: instance:tendis_disk_write_physical_bps
+        - expr: rate(tendis_tendis_process_io_wchar_bytes_total[5m])
+          record: instance:tendis_disk_write_logical_bps
+        - expr: rate(tendis_tendis_process_io_syscr_total[5m])
+          record: instance:tendis_io_read_ops_rate
+        - expr: rate(tendis_tendis_process_io_syscw_total[5m])
+          record: instance:tendis_io_write_ops_rate
+        - expr: rate(tendis_tendis_process_blkio_delay_seconds_total[5m])
+          record: instance:tendis_blkio_delay_rate
+        - expr: sum by(instance) (tendis_binlog_remain)
+          record: instance:tendis_binlog_remain_total
+        - expr: sum by(instance) (tendis_binlog_BHWM)
+          record: instance:tendis_binlog_bhwm
+        - expr: sum by(instance) (tendis_binlog_BLWM)
+          record: instance:tendis_binlog_blwm
+        - expr: sum by(cmd, instance) (rate(tendis_command_calls_total[5m]))
+          record: cmd_instance:tendis_command_calls_rate
+        - expr: avg by(cmd, instance) (tendis_command_usec_per_call)
+          record: cmd_instance:tendis_command_avg_latency

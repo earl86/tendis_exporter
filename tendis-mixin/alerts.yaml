@@ -1,0 +1,203 @@
+groups:
+    - name: tendis_alerts
+      rules:
+        - alert: TendisInstanceDown
+          annotations:
+            description: Tendis instance {{ $labels.instance }} has been down for more than 1 minute.
+            summary: Tendis instance is down
+          expr: tendis_exporter_up == 0
+          for: 1m
+          labels:
+            severity: critical
+        - alert: TendisClusterStateDown
+          annotations:
+            description: The cluster state reported by {{ $labels.instance }} is down/fail.
+            summary: Tendis cluster state is not OK
+          expr: tendis_cluster_state == 0
+          for: 1m
+          labels:
+            severity: critical
+        - alert: TendisHighMemoryUsage
+          annotations:
+            description: Tendis instance {{ $labels.instance }} memory usage is above 90%.
+            summary: Tendis memory usage is critically high
+          expr: instance:tendis_memory_usage_ratio > 0.900000
+          for: 5m
+          labels:
+            severity: critical
+        - alert: TendisReplicationLagHigh
+          annotations:
+            description: Slave {{ $labels.slave_id }} on {{ $labels.instance }} is lagging by {{ $value }} seconds.
+            summary: Tendis replication lag is high
+          expr: tendis_slave_lag_seconds > 30
+          for: 3m
+          labels:
+            severity: warning
+        - alert: TendisReplicationOffsetLagHigh
+          annotations:
+            description: Master {{ $labels.instance }} replication offset lag is {{ $value }}.
+            summary: Tendis replication offset lag is high
+          expr: instance:tendis_replication_offset_lag > 10000
+          for: 5m
+          labels:
+            severity: warning
+        - alert: TendisBinlogRemainHigh
+          annotations:
+            description: Instance {{ $labels.instance }} has {{ $value }} unconsumed binlogs, indicating potential sync or IO issues.
+            summary: Tendis Binlog accumulation is too high
+          expr: instance:tendis_binlog_remain_total > 5000000
+          for: 5m
+          labels:
+            severity: warning
+        - alert: TendisCompactionStopped
+          annotations:
+            description: RocksDB compaction on {{ $labels.instance }} has been stopped for 10 minutes, disk space may inflate rapidly.
+            summary: Tendis RocksDB Compaction has stopped
+          expr: tendis_compaction_status{status="stopped"} == 1
+          for: 10m
+          labels:
+            severity: warning
+        - alert: TendisRocksDBHighReadLatency
+          annotations:
+            description: Average command latency on {{ $labels.instance }} is {{ $value }}s.
+            summary: Tendis command latency is high
+          expr: instance:tendis_avg_command_latency_seconds > 0.100000
+          for: 5m
+          labels:
+            severity: warning
+        - alert: TendisProcessHighMemoryUsage
+          annotations:
+            description: Tendis process on {{ $labels.instance }} is using {{ $value | humanize1024 }} (> 10GiB).
+            summary: Tendis process memory usage is high
+          expr: tendis_tendis_process_resident_memory_bytes > 10737418240
+          for: 10m
+          labels:
+            severity: warning
+        - alert: TendisSlaveBinlogLagHigh
+          annotations:
+            description: Slave {{ $labels.slave_id }} on {{ $labels.instance }} binlog lag is {{ $value }}s (> 60s).
+            summary: Tendis slave binlog lag is high
+          expr: tendis_slave_binlog_lag_seconds > 60
+          for: 5m
+          labels:
+            severity: warning
+        - alert: TendisLowBlockCacheHitRate
+          annotations:
+            description: Block cache hit rate on {{ $labels.instance }} is {{ $value }}% (< 50%).
+            summary: Tendis block cache hit rate is low
+          expr: instance:tendis_block_cache_hit_rate < 0.500000
+          for: 10m
+          labels:
+            severity: warning
+        - alert: TendisLowKeyspaceHitRate
+          annotations:
+            description: Keyspace hit rate on {{ $labels.instance }} is {{ $value }}%% (< 80%%).
+            summary: Tendis keyspace hit rate is low
+          expr: instance:tendis_keyspace_hit_rate < 0.80
+          for: 10m
+          labels:
+            severity: warning
+        - alert: TendisHighConnections
+          annotations:
+            description: Instance {{ $labels.instance }} has {{ $value }} connected clients (> 10000).
+            summary: Tendis connections are high
+          expr: tendis_info_connected_clients > 10000
+          for: 5m
+          labels:
+            severity: warning
+        - alert: TendisHighQPS
+          annotations:
+            description: Instance {{ $labels.instance }} QPS is {{ $value }} (> 10000).
+            summary: Tendis QPS is high
+          expr: instance:tendis_commands_qps:rate5m > 10000
+          for: 5m
+          labels:
+            severity: warning
+        - alert: TendisHighDiskIO
+          annotations:
+            description: Instance {{ $labels.instance }} disk I/O is {{ $value | humanize1024 }}ps (> 100MiB/s).
+            summary: Tendis disk I/O is high
+          expr: instance:tendis_disk_read_physical_bps + instance:tendis_disk_write_physical_bps > 104857600
+          for: 5m
+          labels:
+            severity: warning
+        - alert: TendisSlaveOffline
+          annotations:
+            description: Slave {{ $labels.slave_id }} on {{ $labels.instance }} is offline.
+            summary: Tendis slave is offline
+          expr: tendis_slave_state == 0
+          for: 2m
+          labels:
+            severity: critical
+        - alert: TendisHighPendingCompaction
+          annotations:
+            description: Instance {{ $labels.instance }} has {{ $value | humanize1024 }} pending compaction bytes (> 10GiB).
+            summary: Tendis pending compaction is high
+          expr: tendis_info_rocksdb_estimate_pending_compaction_bytes > 10 * 1024 * 1024 * 1024
+          for: 10m
+          labels:
+            severity: warning
+        - alert: TendisConnectionRejected
+          annotations:
+            description: Instance {{ $labels.instance }} is rejecting connections at {{ $value }}/sec.
+            summary: Tendis connections are being rejected
+          expr: rate(tendis_info_rejected_connections[5m]) > 10
+          for: 5m
+          labels:
+            severity: warning
+        - alert: TendisHighCPUUsage
+          annotations:
+            description: Instance {{ $labels.instance }} CPU usage is {{ $value }}%% (> 80%%).
+            summary: Tendis CPU usage is high
+          expr: instance:tendis_cpu_usage_percent > 80
+          for: 10m
+          labels:
+            severity: warning
+        - alert: TendisClusterSlotFail
+          annotations:
+            description: Instance {{ $labels.instance }} has {{ $value }} failed slots.
+            summary: Tendis cluster has failed slots
+          expr: tendis_info_cluster_cluster_slots_fail > 0
+          for: 5m
+          labels:
+            severity: critical
+        - alert: TendisClusterSlotPFail
+          annotations:
+            description: Instance {{ $labels.instance }} has {{ $value }} potentially failed slots.
+            summary: Tendis cluster has potentially failed slots
+          expr: tendis_info_cluster_cluster_slots_pfail > 0
+          for: 5m
+          labels:
+            severity: warning
+        - alert: TendisShortAverageTTL
+          annotations:
+            description: Instance {{ $labels.instance }} average TTL is {{ $value }}s, which may cause performance issues.
+            summary: Tendis average TTL is short
+          expr: avg by(instance) (tendis_db_avg_ttl_seconds) < 60 and avg by(instance) (tendis_db_avg_ttl_seconds) > 0
+          for: 10m
+          labels:
+            severity: info
+        - alert: TendisMasterLastIODelay
+          annotations:
+            description: Master {{ $labels.instance }} last I/O was {{ $value }}s ago (> 60s).
+            summary: Tendis master last I/O is delayed
+          expr: tendis_info_master_last_io_seconds_ago > 60
+          for: 5m
+          labels:
+            severity: warning
+        - alert: TendisHighSSTFileSize
+          annotations:
+            description: Instance {{ $labels.instance }} SST files size is {{ $value | humanize1024 }} (> 100GiB).
+            summary: Tendis SST files are large
+          expr: tendis_info_rocksdb_total_sst_files_size > 100 * 1024 * 1024 * 1024
+          for: 5m
+          labels:
+            severity: warning
+        - alert: TendisHighNetworkBandwidth
+          annotations:
+            description: Instance {{ $labels.instance }} network bandwidth is {{ $value | humanize }}bps (> 1Gbps).
+            summary: Tendis network bandwidth is high
+          expr: instance:tendis_net_input_bps + instance:tendis_net_output_bps > 1000 * 1024 * 1024
+          for: 5m
+          labels:
+            severity: warning
