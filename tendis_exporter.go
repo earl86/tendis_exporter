@@ -283,11 +283,16 @@ func main() {
 	// 4. 设置 HTTP 路由
 	handlerFunc := newHandler(enabledScrapers, logger)
 
-	// 标准 Metrics 路径
-	http.Handle(*metricsPath, promhttp.InstrumentMetricHandler(prometheus.DefaultRegisterer, handlerFunc))
+	// A. 将 handler 包装一层自带的监控 (记录自身 HTTP 请求状态、耗时等)
+	instrumentedHandler := promhttp.InstrumentMetricHandler(prometheus.DefaultRegisterer, handlerFunc)
 
-	// Probe 路径 (兼容 Blackbox 风格)
-	http.Handle("/probe", handlerFunc)
+	// B. 注册标准 Metrics 路径
+	http.Handle(*metricsPath, instrumentedHandler)
+
+	// C. 注册 Probe 路径 (兼容 Blackbox 风格)，同时防御性判断以避免路由冲突导致 panic
+	if *metricsPath != "/probe" {
+		http.Handle("/probe", instrumentedHandler)
+	}
 
 	// 首页 (Landing Page)
 	if *metricsPath != "/" && *metricsPath != "" {
@@ -310,8 +315,7 @@ func main() {
 
 	// 5. 启动服务
 	srv := &http.Server{}
-	// 修改日志信息，不再打印 listenAddress 变量
-	logger.Info("Starting server", "listen_address", ":9121") // 默认端口，或者你可以只写 "Starting server"
+	logger.Info("Starting server", "listen_address", ":9121")
 	if err := web.ListenAndServe(srv, toolkitFlags, logger); err != nil {
 		logger.Error("Error starting HTTP server", "err", err)
 		os.Exit(1)
