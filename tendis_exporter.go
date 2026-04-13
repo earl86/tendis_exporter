@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	// 确保 go.mod module 名是 tendis_exporter，否则需修改此处路径
@@ -42,8 +43,8 @@ var (
 	// --- Tendis 连接配置 ---
 	tendisAddress = kingpin.Flag(
 		"tendis.addr",
-		"Address of the Tendis instance to scrape (default target).",
-	).Default("localhost:6379").String()
+		"Address of the Tendis instance to scrape: host:port (default target).",
+	).Default("").String()
 
 	tendisPassword = kingpin.Flag(
 		"tendis.password",
@@ -79,22 +80,52 @@ type TendisExporter struct {
 }
 
 // NewTendisExporter 创建一个新的 Exporter 实例，并在内部建立 Tendis 连接
+// 注意：请确保在文件顶部的 import 块中引入了 "strings" 包
+// import "strings"
+
 func NewTendisExporter(ctx context.Context, target string, scrapers []collector.Scraper, logger *slog.Logger) (*TendisExporter, error) {
-	// 如果 URL 参数没传 target，则使用启动参数里的默认地址
-	addr := target
-	if addr == "" {
-		addr = *tendisAddress
+	// 1. 默认使用启动时的全局 Flag 配置
+	addr := *tendisAddress
+	password := *tendisPassword
+
+	// 2. 如果 URL 传了 target 参数，则尝试从中解析 addr 和 password
+	if target != "" {
+		addr = target // 兜底：先假设整个 target 只是地址 (例如仅传了 192.168.1.100:6379)
+
+		// 尝试解析带密码的格式：host:port:password 或 [ipv6]:port:password
+		if strings.HasPrefix(target, "[") {
+			// 处理 IPv6 场景，例如 [::1]:6379:mypassword
+			endBracket := strings.Index(target, "]")
+			if endBracket != -1 {
+				// target[endBracket:] 的内容类似 "]:6379:mypassword"
+				// 切割为最多 3 部分，防止密码本身包含冒号被误切
+				parts := strings.SplitN(target[endBracket:], ":", 3)
+				if len(parts) == 3 {
+					// 重新组装不带密码的 addr，例如 [::1]:6379
+					addr = target[:endBracket+1] + ":" + parts[1]
+					password = parts[2]
+				}
+			}
+		} else {
+			// 处理 IPv4 或域名场景，例如 192.168.1.100:6379:mypassword
+			// 使用 SplitN 限制切割次数，确保若密码含有 ':' 也能完整保留在 parts[2] 中
+			parts := strings.SplitN(target, ":", 3)
+			if len(parts) == 3 {
+				addr = parts[0] + ":" + parts[1]
+				password = parts[2]
+			}
+		}
 	}
 
-	// 调用 collector 包中的连接工厂
-	instance, err := collector.NewTendisInstance(ctx, addr, *tendisPassword)
+	// 3. 调用 collector 包中的连接工厂，传入最终解析得出的 addr 和 password
+	instance, err := collector.NewTendisInstance(ctx, addr, password)
 	if err != nil {
 		return nil, err
 	}
 
 	return &TendisExporter{
 		ctx:      ctx,
-		target:   addr,
+		target:   addr, // 记录实际连接的 target (不含密码，避免向外暴露)
 		scrapers: scrapers,
 		logger:   logger,
 		instance: instance,
