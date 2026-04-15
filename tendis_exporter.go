@@ -83,98 +83,57 @@ type TendisExporter struct {
 // 注意：请确保在文件顶部的 import 块中引入了 "strings" 包
 // import "strings"
 
-func NewTendisExporter(ctx context.Context, target string, scrapers []collector.Scraper, logger *slog.Logger) (*TendisExporter, error) {
+// 修改方法签名，增加 reqPassword, dir, instanceName
+func NewTendisExporter(ctx context.Context, target string, reqPassword string, dir string, instanceName string, scrapers []collector.Scraper, logger *slog.Logger) (*TendisExporter, error) {
 	// 1. 默认使用启动时的全局 Flag 配置
 	addr := *tendisAddress
 	password := *tendisPassword
 
-	// 2. 如果 URL 传了 target 参数，则按照特定的拆分规则解析
+	// 2. 覆盖地址
 	if target != "" {
-		addr = target // 兜底：先假设整个 target 只是地址
-
-		var ipPort string
-		var remainingParts []string
-
-		// 兼容性处理：提取 IP 和 Port (支持 IPv6 和 IPv4)
-		if strings.HasPrefix(target, "[") {
-			// 处理 IPv6 场景，例如 [::1]:6379:data:cw-tendis2
-			endBracket := strings.Index(target, "]")
-			if endBracket != -1 {
-				rest := strings.Split(target[endBracket:], ":")
-				if len(rest) >= 2 {
-					ipPort = target[:endBracket+1] + ":" + rest[1]
-					remainingParts = rest[2:] // 获取端口之后的剩余参数
-				}
-			}
-		} else {
-			// 处理 IPv4 场景，例如 10.18.1.72:4902:data:cw-tendis2
-			parts := strings.Split(target, ":")
-			if len(parts) >= 2 {
-				ipPort = parts[0] + ":" + parts[1]
-				remainingParts = parts[2:] // 获取端口之后的剩余参数
-			}
-		}
-
-		// 核心业务逻辑：根据剩余参数的数量决定密码获取方式
-		if ipPort != "" {
-			addr = ipPort
-
-			switch len(remainingParts) {
-			case 0:
-				// 情况 1: 只有 2 个参数 (IP:Port)
-				// 若 URL 未提供密码，则沿用全局命令行参数中的默认密码。
-				// （由于函数开头 password 已被赋值为 *tendisPassword，这里无需修改变量）
-			case 1:
-				// 情况 2: 只有 3 个参数 (IP:Port:Password)
-				password = remainingParts[0]
-			case 2:
-				// 情况 3: 有 4 个参数 (IP:Port:Dir:InstanceName)
-				dir := remainingParts[0]
-				instanceName := remainingParts[1]
-
-				// 拼接配置文件路径
-				filePath := fmt.Sprintf("/%s/tendis/conf/tendis.conf.%s", dir, instanceName)
-
-				// 读取文件内容
-				fileBytes, err := os.ReadFile(filePath)
-				if err != nil {
-					return nil, fmt.Errorf("failed to read config file %s: %w", filePath, err)
-				}
-
-				// 逐行解析寻找 requirepass
-				lines := strings.Split(string(fileBytes), "\n")
-				found := false
-				for _, line := range lines {
-					line = strings.TrimSpace(line)
-					// 兼容空格和制表符作为分隔符
-					if strings.HasPrefix(line, "requirepass ") || strings.HasPrefix(line, "requirepass\t") {
-						// 提取密码部分 (去除前缀并清理两侧空白字符以及可能存在的双引号/单引号)
-						rawPass := strings.TrimSpace(line[11:]) // 11 是 "requirepass" 的长度
-						password = strings.Trim(rawPass, `"'`)
-						found = true
-						break
-					}
-				}
-
-				if !found {
-					return nil, fmt.Errorf("requirepass directive not found in %s", filePath)
-				}
-			default:
-				// 异常情况：参数超过 4 个，抛出警告，保留原兜底解析结果
-				logger.Warn("Unrecognized target format (more than 4 parts)", "target", target)
-			}
-		}
+		addr = target
 	}
 
-	// 3. 调用 collector 包中的连接工厂，传入最终解析得出的 addr 和 password
+	// 3. 核心业务逻辑：决定密码获取方式
+	if reqPassword != "" {
+		// 优先级 1: URL 中直接传了密码
+		password = reqPassword
+	} else if dir != "" && instanceName != "" {
+		// 优先级 2: URL 传了目录和实例名，去读配置文件
+		filePath := fmt.Sprintf("/%s/tendis/conf/tendis.conf.%s", dir, instanceName)
+
+		fileBytes, err := os.ReadFile(filePath)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read config file %s: %w", filePath, err)
+		}
+
+		lines := strings.Split(string(fileBytes), "\n")
+		found := false
+		for _, line := range lines {
+			line = strings.TrimSpace(line)
+			if strings.HasPrefix(line, "requirepass ") || strings.HasPrefix(line, "requirepass\t") {
+				rawPass := strings.TrimSpace(line[11:])
+				password = strings.Trim(rawPass, `"'`)
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			return nil, fmt.Errorf("requirepass directive not found in %s", filePath)
+		}
+	}
+	// 如果都没命中，就退化到使用全局默认的 *tendisPassword
+
+	// 4. 调用 collector 包中的连接工厂
 	instance, err := collector.NewTendisInstance(ctx, addr, password)
 	if err != nil {
-		return nil, err // 若此处(包含读文件环节)出错，Prometheus 将收到 500 并标记为 scrape_failed
+		return nil, err
 	}
 
 	return &TendisExporter{
 		ctx:      ctx,
-		target:   addr, // 记录实际连接的 target (不含密码和路径，避免向外暴露)
+		target:   addr,
 		scrapers: scrapers,
 		logger:   logger,
 		instance: instance,
@@ -224,12 +183,17 @@ func (e *TendisExporter) Collect(ch chan<- prometheus.Metric) {
 // ==============================================================================
 func newHandler(enabledScrapers []collector.Scraper, logger *slog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// A. 解析参数
+		// A. 解析参数 (新增解析 dir 和 instance_name)
 		target := r.URL.Query().Get("target")
+		dir := r.URL.Query().Get("dir")                    // 新增
+		instanceName := r.URL.Query().Get("instance_name") // 新增
+		reqPassword := r.URL.Query().Get("password")       // 可选：直接通过 URL 传密码兜底
+
 		collects := r.URL.Query()["collect[]"]
 
 		// B. 过滤 Scraper
 		var finalScrapers []collector.Scraper
+		// ... 保持原有过滤逻辑不变 ...
 		if len(collects) > 0 {
 			filter := make(map[string]bool)
 			for _, c := range collects {
@@ -247,6 +211,7 @@ func newHandler(enabledScrapers []collector.Scraper, logger *slog.Logger) http.H
 		// C. 处理超时 Context
 		ctx := r.Context()
 		timeoutSeconds, err := getScrapeTimeoutSeconds(r, *timeoutOffset)
+		// ... 保持原有超时逻辑不变 ...
 		if err != nil {
 			logger.Error("Error getting timeout", "err", err)
 		}
@@ -256,15 +221,13 @@ func newHandler(enabledScrapers []collector.Scraper, logger *slog.Logger) http.H
 			defer cancel()
 		}
 
-		// D. 创建独立的 Registry (关键步骤)
-		// 每次请求都使用新的 Registry，支持并发抓取不同 Target
+		// D. 创建独立的 Registry
 		registry := prometheus.NewRegistry()
 
-		// E. 实例化 Exporter 并注册
-		exporter, err := NewTendisExporter(ctx, target, finalScrapers, logger)
+		// E. 实例化 Exporter 并注册 (注意这里方法签名变了，增加了传参)
+		exporter, err := NewTendisExporter(ctx, target, reqPassword, dir, instanceName, finalScrapers, logger)
 		if err != nil {
 			logger.Error("Failed to create exporter", "err", err)
-			// 连接失败直接返回 500，Prometheus 会记录为 scrape_failed
 			http.Error(w, fmt.Sprintf("Failed to connect to Tendis: %s", err), http.StatusInternalServerError)
 			return
 		}
