@@ -79,12 +79,28 @@ type TendisExporter struct {
 	instance *collector.TendisInstance
 }
 
-// NewTendisExporter 创建一个新的 Exporter 实例，并在内部建立 Tendis 连接
-// 注意：请确保在文件顶部的 import 块中引入了 "strings" 包
-// import "strings"
+// getPasswordFromConf 统一处理从配置文件中提取 requirepass 密码的逻辑
+func getPasswordFromConf(filePath string) (string, error) {
+	fileBytes, err := os.ReadFile(filePath)
+	if err != nil {
+		return "", fmt.Errorf("failed to read config file %s: %w", filePath, err)
+	}
+
+	lines := strings.Split(string(fileBytes), "\n")
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if strings.HasPrefix(line, "requirepass ") || strings.HasPrefix(line, "requirepass\t") {
+			rawPass := strings.TrimSpace(line[11:])
+			return strings.Trim(rawPass, `"'`), nil
+		}
+	}
+
+	return "", fmt.Errorf("requirepass directive not found in %s", filePath)
+}
 
 // 修改方法签名，增加 reqPassword, dir, instanceName
-func NewTendisExporter(ctx context.Context, target string, reqPassword string, dir string, instanceName string, scrapers []collector.Scraper, logger *slog.Logger) (*TendisExporter, error) {
+// 修改方法签名，增加 passwordFile
+func NewTendisExporter(ctx context.Context, target string, reqPassword string, passwordFile string, dir string, instanceName string, scrapers []collector.Scraper, logger *slog.Logger) (*TendisExporter, error) {
 	// 1. 默认使用启动时的全局 Flag 配置
 	addr := *tendisAddress
 	password := *tendisPassword
@@ -94,36 +110,27 @@ func NewTendisExporter(ctx context.Context, target string, reqPassword string, d
 		addr = target
 	}
 
-	// 3. 核心业务逻辑：决定密码获取方式
+	// 3. 核心业务逻辑：按照优先级决定密码获取方式
 	if reqPassword != "" {
-		// 优先级 1: URL 中直接传了密码
+		// 优先级 1: URL 中直接传了明文密码
 		password = reqPassword
-	} else if dir != "" && instanceName != "" {
-		// 优先级 2: URL 传了目录和实例名，去读配置文件
-		filePath := fmt.Sprintf("/%s/tendis/conf/tendis.conf.%s", dir, instanceName)
-
-		fileBytes, err := os.ReadFile(filePath)
+	} else if passwordFile != "" {
+		// 优先级 2: URL 传了具体的配置文件路径，直接读取
+		pwd, err := getPasswordFromConf(passwordFile)
 		if err != nil {
-			return nil, fmt.Errorf("failed to read config file %s: %w", filePath, err)
+			return nil, err // 读取失败直接抛错，方便 Prometheus 记录抓取失败
 		}
-
-		lines := strings.Split(string(fileBytes), "\n")
-		found := false
-		for _, line := range lines {
-			line = strings.TrimSpace(line)
-			if strings.HasPrefix(line, "requirepass ") || strings.HasPrefix(line, "requirepass\t") {
-				rawPass := strings.TrimSpace(line[11:])
-				password = strings.Trim(rawPass, `"'`)
-				found = true
-				break
-			}
+		password = pwd
+	} else if dir != "" && instanceName != "" {
+		// 优先级 3: URL 传了目录和实例名，拼接后读取
+		filePath := fmt.Sprintf("/%s/tendis/conf/tendis.conf.%s", dir, instanceName)
+		pwd, err := getPasswordFromConf(filePath)
+		if err != nil {
+			return nil, err
 		}
-
-		if !found {
-			return nil, fmt.Errorf("requirepass directive not found in %s", filePath)
-		}
+		password = pwd
 	}
-	// 如果都没命中，就退化到使用全局默认的 *tendisPassword
+	// 如果都没命中，就自动降级使用全局默认的 *tendisPassword
 
 	// 4. 调用 collector 包中的连接工厂
 	instance, err := collector.NewTendisInstance(ctx, addr, password)
@@ -188,6 +195,7 @@ func newHandler(enabledScrapers []collector.Scraper, logger *slog.Logger) http.H
 		dir := r.URL.Query().Get("dir")                    // 新增
 		instanceName := r.URL.Query().Get("instance_name") // 新增
 		reqPassword := r.URL.Query().Get("password")       // 可选：直接通过 URL 传密码兜底
+		passwordFile := r.URL.Query().Get("password_file") // 新增：直接传入配置文件路径
 
 		collects := r.URL.Query()["collect[]"]
 
@@ -224,8 +232,8 @@ func newHandler(enabledScrapers []collector.Scraper, logger *slog.Logger) http.H
 		// D. 创建独立的 Registry
 		registry := prometheus.NewRegistry()
 
-		// E. 实例化 Exporter 并注册 (注意这里方法签名变了，增加了传参)
-		exporter, err := NewTendisExporter(ctx, target, reqPassword, dir, instanceName, finalScrapers, logger)
+		// E. 实例化 Exporter 并注册 (增加 passwordFile 传参)
+		exporter, err := NewTendisExporter(ctx, target, reqPassword, passwordFile, dir, instanceName, finalScrapers, logger)
 		if err != nil {
 			logger.Error("Failed to create exporter", "err", err)
 			http.Error(w, fmt.Sprintf("Failed to connect to Tendis: %s", err), http.StatusInternalServerError)
