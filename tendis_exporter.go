@@ -35,6 +35,11 @@ var (
 
 	// toolkitFlags 会自动注册 --web.listen-address，默认端口 :9121
 
+	probePath = kingpin.Flag(
+		"web.probe-path",
+		"Path under which to expose metrics. target, data_dir, service_name, password, password_file. like /probe?target=192.168.0.1:6379&data_dir=/data&service_name=tendis1",
+	).Default("/probe").String()
+
 	timeoutOffset = kingpin.Flag(
 		"timeout-offset",
 		"Offset to subtract from timeout in seconds.",
@@ -98,9 +103,9 @@ func getPasswordFromConf(filePath string) (string, error) {
 	return "", fmt.Errorf("requirepass directive not found in %s", filePath)
 }
 
-// 修改方法签名，增加 reqPassword, dir, instanceName
+// 修改方法签名，增加 reqPassword, data_dir, serviceName
 // 修改方法签名，增加 passwordFile
-func NewTendisExporter(ctx context.Context, target string, reqPassword string, passwordFile string, dir string, instanceName string, scrapers []collector.Scraper, logger *slog.Logger) (*TendisExporter, error) {
+func NewTendisExporter(ctx context.Context, target string, reqPassword string, passwordFile string, data_dir string, serviceName string, scrapers []collector.Scraper, logger *slog.Logger) (*TendisExporter, error) {
 	// 1. 默认使用启动时的全局 Flag 配置
 	addr := *tendisAddress
 	password := *tendisPassword
@@ -121,9 +126,9 @@ func NewTendisExporter(ctx context.Context, target string, reqPassword string, p
 			return nil, err // 读取失败直接抛错，方便 Prometheus 记录抓取失败
 		}
 		password = pwd
-	} else if dir != "" && instanceName != "" {
+	} else if data_dir != "" && serviceName != "" {
 		// 优先级 3: URL 传了目录和实例名，拼接后读取
-		filePath := fmt.Sprintf("/%s/tendis/conf/tendis.conf.%s", dir, instanceName)
+		filePath := fmt.Sprintf("/%s/tendis/conf/tendis.conf.%s", data_dir, serviceName)
 		pwd, err := getPasswordFromConf(filePath)
 		if err != nil {
 			return nil, err
@@ -190,10 +195,10 @@ func (e *TendisExporter) Collect(ch chan<- prometheus.Metric) {
 // ==============================================================================
 func newHandler(enabledScrapers []collector.Scraper, logger *slog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// A. 解析参数 (新增解析 dir 和 instance_name)
+		// A. 解析参数 (新增解析 data_dir 和 service_name)
 		target := r.URL.Query().Get("target")
-		dir := r.URL.Query().Get("dir")                    // 新增
-		instanceName := r.URL.Query().Get("instance_name") // 新增
+		data_dir := r.URL.Query().Get("data_dir")          // 新增
+		serviceName := r.URL.Query().Get("service_name")   // 新增
 		reqPassword := r.URL.Query().Get("password")       // 可选：直接通过 URL 传密码兜底
 		passwordFile := r.URL.Query().Get("password_file") // 新增：直接传入配置文件路径
 
@@ -233,7 +238,7 @@ func newHandler(enabledScrapers []collector.Scraper, logger *slog.Logger) http.H
 		registry := prometheus.NewRegistry()
 
 		// E. 实例化 Exporter 并注册 (增加 passwordFile 传参)
-		exporter, err := NewTendisExporter(ctx, target, reqPassword, passwordFile, dir, instanceName, finalScrapers, logger)
+		exporter, err := NewTendisExporter(ctx, target, reqPassword, passwordFile, data_dir, serviceName, finalScrapers, logger)
 		if err != nil {
 			logger.Error("Failed to create exporter", "err", err)
 			http.Error(w, fmt.Sprintf("Failed to connect to Tendis: %s", err), http.StatusInternalServerError)
